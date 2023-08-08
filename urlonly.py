@@ -1,32 +1,70 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-def find_lowest_performing_urls(df, num_urls=10):
-    url_averages = df.groupby('URL').mean().reset_index()
-    lowest_performing_urls = url_averages.nsmallest(num_urls, 'Clicks')
-    return lowest_performing_urls
+def calculate_performance(df, analyze_by):
+    if analyze_by == 'Full URL':
+        # Calculate average values for each URL
+        avg_df = df.groupby('URL').agg({
+            'impressions': 'mean',
+            'clicks': 'mean',
+            'average position': 'mean',
+            'click through rate': 'mean'
+        }).reset_index()
+    elif analyze_by == 'Individual Queries':
+        # Calculate average values for each URL and query
+        avg_df = df.groupby(['URL', 'queries']).agg({
+            'impressions': 'mean',
+            'clicks': 'mean',
+            'average position': 'mean',
+            'click through rate': 'mean'
+        }).reset_index()
 
+    # Calculate performance compared to the overall average values
+    overall_avg = df[['impressions', 'clicks', 'average position', 'click through rate']].mean()
+    performance_df = avg_df.copy()
+    for metric in ['impressions', 'clicks', 'average position', 'click through rate']:
+        performance_df[f'{metric} performance'] = performance_df[metric] / overall_avg[metric]
+
+    return performance_df
+
+# Streamlit app code
 def main():
-    st.title('URL Metrics Analysis')
-    
-    st.sidebar.write('Upload a CSV file with the following columns:')
-    st.sidebar.write('- URL')
-    st.sidebar.write('- Clicks')
-    st.sidebar.write('- Impressions')
-    st.sidebar.write('- CTR')
-    st.sidebar.write('- Average Position')
+    st.title('URL and Query Performance Analysis')
 
-    uploaded_file = st.sidebar.file_uploader('Choose a CSV file', type=['csv'])
+    # Upload CSV file
+    uploaded_file = st.file_uploader("Upload CSV file", type=['csv'])
 
     if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        
-        st.subheader('Uploaded Data:')
-        st.write(df)
+        try:
+            data = pd.read_csv(uploaded_file)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            st.write("Please ensure your CSV file is correctly formatted.")
+            return
 
-        lowest_performing_urls = find_lowest_performing_urls(df)
-        st.subheader('Top 10 Lowest Performing URLs:')
-        st.write(lowest_performing_urls)
+        if 'queries' not in data.columns:
+            st.warning("The 'queries' column is missing in the CSV file.")
+            return
+
+        # Validate data types of numeric columns
+        numeric_columns = ['impressions', 'clicks', 'average position', 'click through rate']
+        for col in numeric_columns:
+            if data[col].dtype not in ['int64', 'float64']:
+                st.warning(f"The '{col}' column should be numeric (int or float) but is of type {data[col].dtype}.")
+
+        # Show the uploaded data
+        st.subheader('Uploaded Data:')
+        st.write(data)
+
+        # Ask user how to analyze the performance
+        analyze_by = st.radio("Choose how to analyze performance:", ("Full URL", "Individual Queries"))
+
+        # Perform the performance analysis for URLs and queries
+        result = calculate_performance(data, analyze_by)
+
+        # Display the result
+        st.subheader('Performance Analysis:')
+        st.write(result)
 
 if __name__ == '__main__':
     main()
