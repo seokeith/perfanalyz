@@ -32,15 +32,16 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # Multi select for URLs in the sidebar
-                selected_urls = st.sidebar.multiselect(
-                    'Select URLs:',
-                    options=data['URL'].unique(),
-                    default=data['URL'].unique()
+                # URL dropdown filter in the sidebar
+                selected_url = st.sidebar.selectbox(
+                    'Select a URL:',
+                    options=['All URLs'] + data['URL'].unique().tolist(),
+                    format_func=lambda x: x if x != 'All URLs' else 'All URLs'
                 )
 
-                # Filter data by the selected URLs
-                data = data[data['URL'].isin(selected_urls)]
+                # If a specific URL is selected, filter the data by the selected URL
+                if selected_url != 'All URLs':
+                    data = data[data['URL'] == selected_url]
                 
                 # Slider in the sidebar for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
