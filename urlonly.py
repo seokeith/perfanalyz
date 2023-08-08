@@ -43,82 +43,53 @@ def main():
                 if selected_urls:
                     data = data[data['URL'].isin(selected_urls)]
                 
-                # Slider for filtering by number of clicks
-                min_clicks = int(data['Clicks'].min())
-                max_clicks = int(data['Clicks'].max())
+                # Slider for filtering by number of clicks, impressions, CTR, and position
+                attributes_ranges = {
+                    'Clicks': [int(data['Clicks'].min()), int(data['Clicks'].max())],
+                    'Impressions': [int(data['Impressions'].min()), int(data['Impressions'].max())],
+                    'CTR': [float(data['CTR'].min()), float(data['CTR'].max())],
+                    'Position': [float(data['Position'].min()), float(data['Position'].max())]
+                }
 
-                if min_clicks != max_clicks:
-                    clicks_range = st.sidebar.slider(
-                        "Filter by number of clicks:",
-                        min_clicks,
-                        max_clicks,
-                        (min_clicks, max_clicks)
-                    )
-                else:
-                    clicks_range = (min_clicks, max_clicks)
-                    st.sidebar.text(f"Only one value for clicks: {min_clicks}")
+                selected_ranges = {}
+                for attr, (min_val, max_val) in attributes_ranges.items():
+                    if min_val != max_val:
+                        selected_ranges[attr] = st.sidebar.slider(
+                            f"Filter by {attr.lower()}:",
+                            min_val, max_val, (min_val, max_val)
+                        )
+                    else:
+                        selected_ranges[attr] = (min_val, max_val)
+                        st.sidebar.text(f"Only one value for {attr.lower()}: {min_val}")
 
-                # Slider for filtering by number of impressions
-                min_impressions = int(data['Impressions'].min())
-                max_impressions = int(data['Impressions'].max())
+                # Calculate the average clicks, impressions, CTR, and position
+                averages = {
+                    'Clicks': data['Clicks'].mean(),
+                    'Impressions': data['Impressions'].mean(),
+                    'CTR': data['CTR'].mean(),
+                    'Position': data['Position'].mean()
+                }
+                for attr, avg_val in averages.items():
+                    st.sidebar.text(f"Average {attr}: {avg_val:.2f}")
 
-                if min_impressions != max_impressions:
-                    impressions_range = st.sidebar.slider(
-                        "Filter by number of impressions:",
-                        min_impressions,
-                        max_impressions,
-                        (min_impressions, max_impressions)
-                    )
-                else:
-                    impressions_range = (min_impressions, max_impressions)
-                    st.sidebar.text(f"Only one value for impressions: {min_impressions}")
+                # Button to show URLs with lower or higher than average values (higher for Position)
+                display_data = None
+                for attr, avg_val in averages.items():
+                    if st.sidebar.button(f"Show URLs with {'higher' if attr == 'Position' else 'less'} than average {attr.lower()}"):
+                        if attr == 'Position':
+                            display_data = data[data[attr] > avg_val]
+                        else:
+                            display_data = data[data[attr] < avg_val]
+                        display_data = display_data.sort_values(by=attr, ascending=(attr == 'Position'))
+                        break
 
-                # Slider for filtering by CTR
-                min_ctr = float(data['CTR'].min())
-                max_ctr = float(data['CTR'].max())
+                if display_data is None:
+                    display_data = data
+                    for attr, (min_val, max_val) in selected_ranges.items():
+                        display_data = display_data[(display_data[attr] >= min_val) & (display_data[attr] <= max_val)]
 
-                if min_ctr != max_ctr:
-                    ctr_range = st.sidebar.slider(
-                        "Filter by CTR:",
-                        min_ctr,
-                        max_ctr,
-                        (min_ctr, max_ctr)
-                    )
-                else:
-                    ctr_range = (min_ctr, max_ctr)
-                    st.sidebar.text(f"Only one value for CTR: {min_ctr:.2f}")
-
-                # Calculate the average clicks, impressions, and CTR
-                avg_clicks = data['Clicks'].mean()
-                st.sidebar.text(f"Average Clicks: {avg_clicks:.2f}")
-                avg_impressions = data['Impressions'].mean()
-                st.sidebar.text(f"Average Impressions: {avg_impressions:.2f}")
-                avg_ctr = data['CTR'].mean()
-                st.sidebar.text(f"Average CTR: {avg_ctr:.2f}%")
-
-                # Button to show URLs with lower than average values
-                if st.sidebar.button("Show URLs with less than average clicks"):
-                    lower_than_avg_clicks = data[data['Clicks'] < avg_clicks]
-                    sorted_clicks = lower_than_avg_clicks.sort_values(by='Clicks', ascending=True)
-                    for index, row in sorted_clicks.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
-                elif st.sidebar.button("Show URLs with less than average impressions"):
-                    lower_than_avg_impressions = data[data['Impressions'] < avg_impressions]
-                    sorted_impressions = lower_than_avg_impressions.sort_values(by='Impressions', ascending=True)
-                    for index, row in sorted_impressions.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
-                elif st.sidebar.button("Show URLs with less than average CTR"):
-                    lower_than_avg_ctr = data[data['CTR'] < avg_ctr]
-                    sorted_ctr = lower_than_avg_ctr.sort_values(by='CTR', ascending=True)
-                    for index, row in sorted_ctr.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
-                else:
-                    filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1]) & 
-                                         (data['Impressions'] >= impressions_range[0]) & (data['Impressions'] <= impressions_range[1]) & 
-                                         (data['CTR'] >= ctr_range[0]) & (data['CTR'] <= ctr_range[1])]
-
-                    for index, row in filtered_data.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
+                for index, row in display_data.iterrows():
+                    st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
