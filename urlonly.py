@@ -38,9 +38,9 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # Display the URLs as plain text
-                for url in data['URL']:
-                    st.text(url)
+                # Display the URLs and their corresponding clicks
+                for index, row in data.iterrows():
+                    st.text(f"URL: {row['URL']} | Clicks: {row['Clicks']}")
                 
                 # Commenting out this line to prevent Streamlit from attempting to display the entire dataframe.
                 # st.write(data)  
