@@ -42,7 +42,8 @@ def main():
                 for url in data['URL']:
                     st.text(url)
                 
-                st.write(data)  # This will display the entire dataframe
+                # Commenting out this line to prevent Streamlit from attempting to display the entire dataframe.
+                # st.write(data)  
                 
             else:
                 st.error(validation_message)
