@@ -20,7 +20,7 @@ def validate_data(data):
     return "Data is valid!"
 
 def main():
-    st.title("GSC Data Cruncher")
+    st.title("CSV Data Upload and Display")
 
     # Upload CSV
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -31,7 +31,11 @@ def main():
             validation_message = validate_data(data)
             if validation_message == "Data is valid!":
                 st.success(validation_message)
-                    
+                
+                # Reset Filters Button
+                if st.sidebar.button("Reset Filters"):
+                    st.experimental_rerun()
+                
                 # URL multi-select dropdown filter in the sidebar
                 selected_urls = st.sidebar.multiselect(
                     'Select URLs:',
