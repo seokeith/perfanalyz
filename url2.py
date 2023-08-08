@@ -1,62 +1,64 @@
 import pandas as pd
 import streamlit as st
 
-def calculate_performance(df):
-    # Your previous function to calculate performance
-    # ...
+def calculate_performance(df, analyze_by):
+    if analyze_by == 'Full URL':
+        # Calculate average values for each URL
+        avg_df = df.groupby('URL').agg({
+            'impressions': 'mean',
+            'clicks': 'mean',
+            'average position': 'mean',
+            'click through rate': 'mean'
+        }).reset_index()
+    elif analyze_by == 'Individual Queries':
+        # Calculate average values for each URL and query
+        avg_df = df.groupby(['URL', 'queries']).agg({
+            'impressions': 'mean',
+            'clicks': 'mean',
+            'average position': 'mean',
+            'click through rate': 'mean'
+        }).reset_index()
+
+    # Calculate performance compared to the overall average values
+    overall_avg = df[['impressions', 'clicks', 'average position', 'click through rate']].mean()
+    performance_df = avg_df.copy()
+    for metric in ['impressions', 'clicks', 'average position', 'click through rate']:
+        performance_df[f'{metric} performance'] = performance_df[metric] / overall_avg[metric]
+
+    return performance_df
 
 # Streamlit app code
-    def main():
-    st.title('URL Performance Analysis')
+def main():
+    st.title('URL and Query Performance Analysis')
 
-    # Upload CSV file or provide data manually
-    option = st.radio("Choose an option:", ("Upload CSV file", "Provide data manually"))
+    # Upload CSV file
+    uploaded_file = st.file_uploader("Upload CSV file", type=['csv'])
 
-    if option == "Upload CSV file":
-        uploaded_file = st.file_uploader("Upload CSV file", type=['csv'])
+    if uploaded_file is not None:
+        try:
+            data = pd.read_csv(uploaded_file)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            st.write("Please ensure your CSV file is correctly formatted.")
+            return
 
-        if uploaded_file is not None:
-            try:
-                data = pd.read_csv(uploaded_file)
-            except Exception as e:
-                st.error(f"Error: {e}")
-                st.write("Please ensure your CSV file is correctly formatted.")
-                return
-    else:
-        st.write("Enter data manually:")
-        data = pd.DataFrame({
-            'month': st.text_input("Month (YYYY-MM)"),
-            'URL': st.text_input("URL"),
-            'impressions': st.number_input("Impressions"),
-            'clicks': st.number_input("Clicks"),
-            'average position': st.number_input("Average Position"),
-            'click through rate': st.number_input("Click Through Rate"),
-        })
+        if 'queries' not in data.columns:
+            st.warning("The 'queries' column is missing in the CSV file.")
+            return
 
-    if data.empty:
-        st.warning("No data available.")
-        return
+        # Show the uploaded data
+        st.subheader('Uploaded Data:')
+        st.write(data)
 
-    # Show the uploaded data or manually entered data
-    st.subheader('Data:')
-    st.write(data)
+        # Ask user how to analyze the performance
+        analyze_by = st.radio("Choose how to analyze performance:", ("Full URL", "Individual Queries"))
 
-    # Ask user for the URL to query
-    query_url = st.text_input("Enter the URL to query:")
+        # Perform the performance analysis for URLs and queries
+        result = calculate_performance(data, analyze_by)
 
-    if query_url:
-        # Filter data for the selected URL
-        filtered_data = data[data['URL'] == query_url]
-
-        if not filtered_data.empty:
-            # Perform the performance analysis for the selected URL
-            result = calculate_performance(filtered_data)
-
-            # Display the result
-            st.subheader(f'Performance Analysis for "{query_url}"')
-            st.write(result)
-        else:
-            st.warning("URL not found in the data.")
+        # Display the result
+        st.subheader('Performance Analysis:')
+        st.write(result)
 
 if __name__ == '__main__':
     main()
