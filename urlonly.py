@@ -32,32 +32,27 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # URL dropdown filter in the sidebar
-                selected_url = st.sidebar.selectbox(
-                    'Select a URL:',
+                # Multi-select URLs or part of URLs
+                selected_urls = st.sidebar.multiselect(
+                    'Select URLs or part of URLs:',
                     options=['All URLs'] + data['URL'].tolist(),
-                    format_func=lambda x: x if x != 'All URLs' else 'All URLs'
+                    default=['All URLs']
                 )
 
-                # If a specific URL is selected, filter the data by the selected URL
-                if selected_url != 'All URLs':
-                    data = data[data['URL'] == selected_url]
+                # If URLs or parts of URLs are selected, filter the data
+                if selected_urls != ['All URLs']:
+                    mask = data['URL'].apply(lambda x: any(url in x for url in selected_urls))
+                    data = data[mask]
                 
                 # Slider in the sidebar for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
                 max_clicks = int(data['Clicks'].max())
-                
-                # Handle case where min_clicks equals max_clicks
-                if min_clicks == max_clicks:
-                    st.sidebar.text(f"Clicks: {min_clicks}")
-                    clicks_range = (min_clicks, max_clicks)
-                else:
-                    clicks_range = st.sidebar.slider(
-                        "Filter by number of clicks:",
-                        min_clicks,
-                        max_clicks,
-                        (min_clicks, max_clicks)
-                    )
+                clicks_range = st.sidebar.slider(
+                    "Filter by number of clicks:",
+                    min_clicks,
+                    max_clicks,
+                    (min_clicks, max_clicks)
+                )
 
                 # Calculate the average clicks
                 avg_clicks = data['Clicks'].mean()
