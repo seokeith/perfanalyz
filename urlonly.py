@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-def calculate_click_comparison(df):
-    avg_position_clicks = df.groupby('Average Position')['Clicks'].mean().reset_index()
-    impressions_clicks = df.groupby('Impressions')['Clicks'].mean().reset_index()
-    return avg_position_clicks, impressions_clicks
+def find_lowest_performing_urls(df, num_urls=10):
+    url_averages = df.groupby('URL').mean().reset_index()
+    lowest_performing_urls = url_averages.nsmallest(num_urls, 'Clicks')
+    return lowest_performing_urls
 
 def main():
     st.title('URL Metrics Analysis')
@@ -24,13 +24,9 @@ def main():
         st.subheader('Uploaded Data:')
         st.write(df)
 
-        avg_position_clicks, impressions_clicks = calculate_click_comparison(df)
-
-        st.subheader('Clicks Comparison based on Average Position:')
-        st.write(avg_position_clicks)
-
-        st.subheader('Clicks Comparison based on Impressions:')
-        st.write(impressions_clicks)
+        lowest_performing_urls = find_lowest_performing_urls(df)
+        st.subheader('Top 10 Lowest Performing URLs:')
+        st.write(lowest_performing_urls)
 
 if __name__ == '__main__':
     main()
