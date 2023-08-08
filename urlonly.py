@@ -32,32 +32,30 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # Multi-select URLs or part of URLs
+                # URL dropdown filter in the sidebar
                 selected_urls = st.sidebar.multiselect(
-                    'Select URLs or part of URLs:',
-                    options=['All URLs'] + data['URL'].tolist(),
-                    default=['All URLs']
+                    'Select URLs:',
+                    options=data['URL'].unique().tolist(),
+                    default=data['URL'].unique().tolist()
                 )
 
-                # If URLs or parts of URLs are selected, filter the data
-                if selected_urls != ['All URLs']:
-                    mask = data['URL'].apply(lambda x: any(url in x for url in selected_urls))
-                    data = data[mask]
+                # Filter the data by the selected URLs
+                data = data[data['URL'].isin(selected_urls)]
                 
-# Slider in the sidebar for filtering by number of clicks
-min_clicks = int(data['Clicks'].min())
-max_clicks = int(data['Clicks'].max())
+                # Slider in the sidebar for filtering by number of clicks
+                min_clicks = int(data['Clicks'].min())
+                max_clicks = int(data['Clicks'].max())
 
-if min_clicks != max_clicks:
-    clicks_range = st.sidebar.slider(
-        "Filter by number of clicks:",
-        min_clicks,
-        max_clicks,
-        (min_clicks, max_clicks)
-    )
-else:
-    clicks_range = (min_clicks, max_clicks)
-    st.sidebar.text(f"Only one value for clicks: {min_clicks}")
+                if min_clicks != max_clicks:
+                    clicks_range = st.sidebar.slider(
+                        "Filter by number of clicks:",
+                        min_clicks,
+                        max_clicks,
+                        (min_clicks, max_clicks)
+                    )
+                else:
+                    clicks_range = (min_clicks, max_clicks)
+                    st.sidebar.text(f"Only one value for clicks: {min_clicks}")
 
                 # Calculate the average clicks
                 avg_clicks = data['Clicks'].mean()
