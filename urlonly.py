@@ -49,11 +49,23 @@ def main():
                     (min_clicks, max_clicks)
                 )
                 
-                filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
+                # Calculate the average clicks
+                avg_clicks = data['Clicks'].mean()
+                st.sidebar.text(f"Average Clicks: {avg_clicks:.2f}")
                 
-                # Displaying the filtered URLs and Clicks
-                for index, row in filtered_data.iterrows():
-                    st.write(row['URL'], "-", row['Clicks'], "clicks")
+                # Button to show URLs with lower than average clicks
+                if st.sidebar.button("Show URLs with less than average clicks"):
+                    lower_than_avg = data[data['Clicks'] < avg_clicks]
+                    sorted_data = lower_than_avg.sort_values(by='Clicks', ascending=True)
+                    
+                    for index, row in sorted_data.iterrows():
+                        st.write(row['URL'], "-", row['Clicks'], "clicks")
+                else:
+                    filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
+                    
+                    # Displaying the filtered URLs and Clicks
+                    for index, row in filtered_data.iterrows():
+                        st.write(row['URL'], "-", row['Clicks'], "clicks")
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
