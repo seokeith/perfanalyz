@@ -51,8 +51,8 @@ def main():
                 
                 filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
                 
-                for index, row in filtered_data.iterrows():
-                    st.text(f"URL: {row['URL']} | Clicks: {row['Clicks']}")
+                # Displaying the filtered data in a table format
+                st.table(filtered_data[['URL', 'Clicks']])
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
