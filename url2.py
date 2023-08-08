@@ -6,7 +6,7 @@ def calculate_performance(df):
     # ...
 
 # Streamlit app code
-def main():
+    def main():
     st.title('URL Performance Analysis')
 
     # Upload CSV file or provide data manually
