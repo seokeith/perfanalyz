@@ -3,23 +3,10 @@ import streamlit as st
 
 def calculate_performance(df, analyze_by):
     if analyze_by == 'Full URL':
-        # Calculate average values for each URL
-        avg_df = df.groupby('URL').agg({
-            'impressions': 'mean',
-            'clicks': 'mean',
-            'average position': 'mean',
-            'click through rate': 'mean'
-        }).reset_index()
+        avg_df = df.groupby('URL').mean().reset_index()
     elif analyze_by == 'Individual Queries':
-        # Calculate average values for each URL and query
-        avg_df = df.groupby(['URL', 'queries']).agg({
-            'impressions': 'mean',
-            'clicks': 'mean',
-            'average position': 'mean',
-            'click through rate': 'mean'
-        }).reset_index()
+        avg_df = df.groupby(['URL', 'queries']).mean().reset_index()
 
-    # Calculate performance compared to the overall average values
     overall_avg = df[['impressions', 'clicks', 'average position', 'click through rate']].mean()
     performance_df = avg_df.copy()
     for metric in ['impressions', 'clicks', 'average position', 'click through rate']:
@@ -42,29 +29,22 @@ def main():
             st.write("Please ensure your CSV file is correctly formatted.")
             return
 
-        if 'queries' not in data.columns:
-            st.warning("The 'queries' column is missing in the CSV file.")
-            return
-
-        # Validate data types of numeric columns
-        numeric_columns = ['impressions', 'clicks', 'average position', 'click through rate']
-        for col in numeric_columns:
-            if data[col].dtype not in ['int64', 'float64']:
-                st.warning(f"The '{col}' column should be numeric (int or float) but is of type {data[col].dtype}.")
-
-        # Show the uploaded data
         st.subheader('Uploaded Data:')
         st.write(data)
 
-        # Ask user how to analyze the performance
-        analyze_by = st.radio("Choose how to analyze performance:", ("Full URL", "Individual Queries"))
+        col_input = st.text_input("Enter the column names (comma-separated)", "month,URL,queries,impressions,clicks,average position,click through rate")
+        columns = [col.strip() for col in col_input.split(',')]
 
-        # Perform the performance analysis for URLs and queries
-        result = calculate_performance(data, analyze_by)
+        if all(col in data.columns for col in columns):
+            analyze_by = st.radio("Choose how to analyze performance:", ("Full URL", "Individual Queries"))
 
-        # Display the result
-        st.subheader('Performance Analysis:')
-        st.write(result)
+            # Perform the performance analysis for URLs and queries
+            result = calculate_performance(data[columns], analyze_by)
+
+            st.subheader('Performance Analysis:')
+            st.write(result)
+        else:
+            st.warning("One or more of the specified columns is not in the dataset.")
 
 if __name__ == '__main__':
     main()
