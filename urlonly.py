@@ -44,15 +44,20 @@ def main():
                     mask = data['URL'].apply(lambda x: any(url in x for url in selected_urls))
                     data = data[mask]
                 
-                # Slider in the sidebar for filtering by number of clicks
-                min_clicks = int(data['Clicks'].min())
-                max_clicks = int(data['Clicks'].max())
-                clicks_range = st.sidebar.slider(
-                    "Filter by number of clicks:",
-                    min_clicks,
-                    max_clicks,
-                    (min_clicks, max_clicks)
-                )
+               # Slider in the sidebar for filtering by number of clicks
+min_clicks = int(data['Clicks'].min())
+max_clicks = int(data['Clicks'].max())
+
+if min_clicks != max_clicks:
+    clicks_range = st.sidebar.slider(
+        "Filter by number of clicks:",
+        min_clicks,
+        max_clicks,
+        (min_clicks, max_clicks)
+    )
+else:
+    clicks_range = (min_clicks, max_clicks)
+    st.sidebar.text(f"Only one value for clicks: {min_clicks}")
 
                 # Calculate the average clicks
                 avg_clicks = data['Clicks'].mean()
