@@ -7,11 +7,11 @@ def validate_data(data):
         return 'URL column should only contain strings representing the web URL.'
 
     # Check Clicks column for integer format
-    if not all(isinstance(item, (int, float)) and item.is_integer() for item in data['Clicks']):
+    if not all((isinstance(item, float) and item.is_integer()) or isinstance(item, int) for item in data['Clicks']):
         return 'Clicks column should only contain integers representing the number of clicks.'
 
     # Check Impressions column for integer format
-    if not all(isinstance(item, (int, float)) and item.is_integer() for item in data['Impressions']):
+    if not all((isinstance(item, float) and item.is_integer()) or isinstance(item, int) for item in data['Impressions']):
         return 'Impressions column should only contain integers representing the number of impressions.'
 
     # Check CTR column for float format between 0.0 and 1.0
