@@ -85,19 +85,19 @@ def main():
                     sorted_clicks = lower_than_avg_clicks.sort_values(by='Clicks', ascending=True)
 
                     for index, row in sorted_clicks.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
                 elif st.sidebar.button("Show URLs with less than average impressions"):
                     lower_than_avg_impressions = data[data['Impressions'] < avg_impressions]
                     sorted_impressions = lower_than_avg_impressions.sort_values(by='Impressions', ascending=True)
 
                     for index, row in sorted_impressions.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
                 else:
                     filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1]) & 
                                          (data['Impressions'] >= impressions_range[0]) & (data['Impressions'] <= impressions_range[1])]
 
                     for index, row in filtered_data.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
