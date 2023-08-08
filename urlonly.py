@@ -44,7 +44,7 @@ def main():
                     mask = data['URL'].apply(lambda x: any(url in x for url in selected_urls))
                     data = data[mask]
                 
-               # Slider in the sidebar for filtering by number of clicks
+# Slider in the sidebar for filtering by number of clicks
 min_clicks = int(data['Clicks'].min())
 max_clicks = int(data['Clicks'].max())
 
