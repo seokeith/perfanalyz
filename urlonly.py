@@ -20,7 +20,7 @@ def validate_data(data):
     return "Data is valid!"
 
 def main():
-    st.title("CSV Data Upload and Display")
+    st.title("GSC Data Cruncher")
 
     # Upload CSV
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
