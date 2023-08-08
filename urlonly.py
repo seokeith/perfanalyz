@@ -3,7 +3,7 @@ import pandas as pd
 
 def calculate_click_comparison(df):
     # Group by average rank and calculate mean clicks
-    avg_rank_clicks = df.groupby('Average rank')['Clicks'].mean().reset_index()
+    avg_rank_clicks = df.groupby('Average Rank')['Clicks'].mean().reset_index()
 
     # Group by impressions and calculate mean clicks
     impressions_clicks = df.groupby('Impressions')['Clicks'].mean().reset_index()
@@ -14,7 +14,13 @@ def main():
     st.title('URL Metrics Analysis')
 
     # File Upload
-    st.write('Upload a CSV file with columns: URLs, Clicks, Impressions, Average Rank, Click Through Rate')
+    st.write('Upload a CSV file with the following columns:')
+    st.write('- URLs')
+    st.write('- Clicks')
+    st.write('- Impressions')
+    st.write('- Average Rank')
+    st.write('- Click Through Rate')
+    
     uploaded_file = st.file_uploader('Choose a CSV file', type=['csv'])
 
     if uploaded_file is not None:
