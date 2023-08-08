@@ -32,6 +32,10 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
+                # Reset Filters Button
+                if st.sidebar.button("Reset Filters"):
+                    st.experimental_rerun()
+                
                 # URL multi-select dropdown filter in the sidebar
                 selected_urls = st.sidebar.multiselect(
                     'Select URLs:',
@@ -47,20 +51,16 @@ def main():
                 attributes_ranges = {
                     'Clicks': [int(data['Clicks'].min()), int(data['Clicks'].max())],
                     'Impressions': [int(data['Impressions'].min()), int(data['Impressions'].max())],
-                    'CTR': [float(data['CTR'].min()), float(data['CTR'].max())],
-                    'Position': [float(data['Position'].min()), float(data['Position'].max())]
+                    'CTR': [data['CTR'].min(), data['CTR'].max()],
+                    'Position': [data['Position'].min(), data['Position'].max()]
                 }
 
                 selected_ranges = {}
                 for attr, (min_val, max_val) in attributes_ranges.items():
-                    if min_val != max_val:
-                        selected_ranges[attr] = st.sidebar.slider(
-                            f"Filter by {attr.lower()}:",
-                            min_val, max_val, (min_val, max_val)
-                        )
-                    else:
-                        selected_ranges[attr] = (min_val, max_val)
-                        st.sidebar.text(f"Only one value for {attr.lower()}: {min_val}")
+                    selected_ranges[attr] = st.sidebar.slider(
+                        f"Filter by {attr.lower()}:",
+                        min_val, max_val, (min_val, max_val)
+                    )
 
                 # Calculate the average clicks, impressions, CTR, and position
                 averages = {
