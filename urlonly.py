@@ -1,57 +1,45 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 
-def calculate_performance(df, analyze_by):
-    if analyze_by == 'Full URL':
-        avg_df = df.groupby('URL').mean().reset_index()
-    elif analyze_by == 'Individual Queries':
-        avg_df = df.groupby(['URL', 'queries']).mean().reset_index()
-
-    overall_avg = df[['impressions', 'clicks', 'average position', 'click through rate']].mean()
-    performance_df = avg_df.copy()
-    for metric in ['impressions', 'clicks', 'average position', 'click through rate']:
-        performance_df[f'{metric} performance'] = performance_df[metric] / overall_avg[metric]
-
-    return performance_df
-
-# Streamlit app code
 def main():
-    st.title('URL and Query Performance Analysis')
+    st.title('CSV Data Viewer')
 
-    # Upload CSV file
-    uploaded_file = st.file_uploader("Upload CSV file", type=['csv'])
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    if uploaded_file:
+        data = pd.read_csv(uploaded_file)
 
-    if uploaded_file is not None:
-        try:
-            data = pd.read_csv(uploaded_file)
-        except Exception as e:
-            st.error(f"Error: {e}")
-            st.write("Please ensure your CSV file is correctly formatted.")
+        # Validate the CSV format
+        expected_columns = ["URL", "Clicks", "Impressions", "CTR", "Position"]
+        if not all(col in data.columns for col in expected_columns):
+            st.error('Invalid CSV file format. Please make sure the CSV has the required columns.')
             return
 
-        st.subheader('Uploaded Data:')
+        # Filter controls
+        st.sidebar.header('Filters')
+
+        # Filter by URL
+        unique_urls = data['URL'].unique().tolist()
+        selected_url = st.sidebar.multiselect('URL', unique_urls, default=unique_urls)
+        data = data[data['URL'].isin(selected_url)]
+
+        # Filter by Clicks
+        min_clicks, max_clicks = st.sidebar.slider('Clicks', int(data['Clicks'].min()), int(data['Clicks'].max()), [int(data['Clicks'].min()), int(data['Clicks'].max())])
+        data = data[(data['Clicks'] >= min_clicks) & (data['Clicks'] <= max_clicks)]
+
+        # Filter by Impressions
+        min_impressions, max_impressions = st.sidebar.slider('Impressions', int(data['Impressions'].min()), int(data['Impressions'].max()), [int(data['Impressions'].min()), int(data['Impressions'].max())])
+        data = data[(data['Impressions'] >= min_impressions) & (data['Impressions'] <= max_impressions)]
+
+        # Filter by CTR
+        min_ctr, max_ctr = st.sidebar.slider('CTR', float(data['CTR'].min()), float(data['CTR'].max()), [float(data['CTR'].min()), float(data['CTR'].max())])
+        data = data[(data['CTR'] >= min_ctr) & (data['CTR'] <= max_ctr)]
+
+        # Filter by Position
+        min_position, max_position = st.sidebar.slider('Position', float(data['Position'].min()), float(data['Position'].max()), [float(data['Position'].min()), float(data['Position'].max())])
+        data = data[(data['Position'] >= min_position) & (data['Position'] <= max_position)]
+
+        # Display the filtered data
         st.write(data)
-
-        col_input = st.text_input("Enter the column names (comma-separated)", "month,URL,queries,impressions,clicks,average position,click through rate")
-        columns = [col.strip() for col in col_input.split(',')]
-
-        if all(col in data.columns for col in columns):
-            analyze_by = st.radio("Choose how to analyze performance:", ("Full URL", "Individual Queries"))
-
-            # Perform the performance analysis for URLs and queries
-            result = calculate_performance(data[columns], analyze_by)
-
-            st.subheader('Performance Analysis:')
-            st.dataframe(result.rename(columns={'queries': 'Queries', 'URL': 'URL / Queries'}).sort_values('impressions performance'))
-
-            low_performing_threshold = 0.8  # You can adjust this threshold
-            low_performing_metrics = result.columns[5:]  # Assuming performance columns start from index 5
-            low_performing_df = result[result[low_performing_metrics] < low_performing_threshold]
-            st.subheader('Low Performing URLs / Queries:')
-            st.dataframe(low_performing_df[['URL / Queries', 'Queries'] + low_performing_metrics])
-
-        else:
-            st.warning("One or more of the specified columns is not in the dataset.")
 
 if __name__ == '__main__':
     main()
