@@ -33,14 +33,15 @@ def main():
                 st.success(validation_message)
                 
                 # URL dropdown filter in the sidebar
-                selected_urls = st.sidebar.multiselect(
-                    'Select URLs:',
-                    options=data['URL'].unique().tolist(),
-                    default=data['URL'].unique().tolist()
+                selected_url = st.sidebar.selectbox(
+                    'Select a URL:',
+                    options=['All URLs'] + data['URL'].unique().tolist(),
+                    format_func=lambda x: x if x != 'All URLs' else 'All URLs'
                 )
 
-                # Filter the data by the selected URLs
-                data = data[data['URL'].isin(selected_urls)]
+                # If a specific URL is selected, filter the data by the selected URL
+                if selected_url != 'All URLs':
+                    data = data[data['URL'] == selected_url]
                 
                 # Slider in the sidebar for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
@@ -69,13 +70,4 @@ def main():
                     for index, row in sorted_data.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks")
                 else:
-                    filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
-
-                    for index, row in filtered_data.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks")
-
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    main()
+                    filtered_data = data[(data['Clicks'] >= clicks_range[
