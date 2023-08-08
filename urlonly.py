@@ -31,10 +31,6 @@ def main():
             validation_message = validate_data(data)
             if validation_message == "Data is valid!":
                 st.success(validation_message)
-                
-                # Add reset filters button
-                if st.sidebar.button("Reset Filters"):
-                    st.experimental_rerun()
                     
                 # URL multi-select dropdown filter in the sidebar
                 selected_urls = st.sidebar.multiselect(
