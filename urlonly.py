@@ -38,15 +38,21 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # Display the URLs and their corresponding clicks
-                for index, row in data.iterrows():
+                # Slider in the sidebar for filtering by number of clicks
+                min_clicks = int(data['Clicks'].min())
+                max_clicks = int(data['Clicks'].max())
+                
+                clicks_range = st.sidebar.slider(
+                    "Filter by number of clicks:",
+                    min_clicks,
+                    max_clicks,
+                    (min_clicks, max_clicks)
+                )
+                
+                filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
+                
+                for index, row in filtered_data.iterrows():
                     st.text(f"URL: {row['URL']} | Clicks: {row['Clicks']}")
-                
-                # Commenting out this line to prevent Streamlit from attempting to display the entire dataframe.
-                # st.write(data)  
-                
-            else:
-                st.error(validation_message)
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
