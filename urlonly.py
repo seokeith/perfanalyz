@@ -42,7 +42,14 @@ def main():
             result = calculate_performance(data[columns], analyze_by)
 
             st.subheader('Performance Analysis:')
-            st.write(result)
+            st.dataframe(result.rename(columns={'queries': 'Queries', 'URL': 'URL / Queries'}).sort_values('impressions performance'))
+
+            low_performing_threshold = 0.8  # You can adjust this threshold
+            low_performing_metrics = result.columns[5:]  # Assuming performance columns start from index 5
+            low_performing_df = result[result[low_performing_metrics] < low_performing_threshold]
+            st.subheader('Low Performing URLs / Queries:')
+            st.dataframe(low_performing_df[['URL / Queries', 'Queries'] + low_performing_metrics])
+
         else:
             st.warning("One or more of the specified columns is not in the dataset.")
 
