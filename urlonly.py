@@ -35,12 +35,13 @@ def main():
                 # URL multi-select dropdown filter in the sidebar
                 selected_urls = st.sidebar.multiselect(
                     'Select URLs:',
-                    options=data['URL'].unique(),
-                    default=data['URL'].unique()
+                    options=list(data['URL'].unique()),
+                    default=list(data['URL'].unique())
                 )
 
-                # Filter data by the selected URLs
-                data = data[data['URL'].isin(selected_urls)]
+                # If specific URLs are selected, filter the data by the selected URLs
+                if selected_urls:
+                    data = data[data['URL'].isin(selected_urls)]
                 
                 # Slider in the sidebar for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
