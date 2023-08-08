@@ -43,7 +43,7 @@ def main():
                 if selected_urls:
                     data = data[data['URL'].isin(selected_urls)]
                 
-                # Slider in the sidebar for filtering by number of clicks
+                # Slider for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
                 max_clicks = int(data['Clicks'].max())
 
@@ -73,28 +73,49 @@ def main():
                     impressions_range = (min_impressions, max_impressions)
                     st.sidebar.text(f"Only one value for impressions: {min_impressions}")
 
-                # Calculate the average clicks and impressions
+                # Slider for filtering by CTR
+                min_ctr = float(data['CTR'].min())
+                max_ctr = float(data['CTR'].max())
+
+                if min_ctr != max_ctr:
+                    ctr_range = st.sidebar.slider(
+                        "Filter by CTR:",
+                        min_ctr,
+                        max_ctr,
+                        (min_ctr, max_ctr)
+                    )
+                else:
+                    ctr_range = (min_ctr, max_ctr)
+                    st.sidebar.text(f"Only one value for CTR: {min_ctr:.2f}")
+
+                # Calculate the average clicks, impressions, and CTR
                 avg_clicks = data['Clicks'].mean()
                 st.sidebar.text(f"Average Clicks: {avg_clicks:.2f}")
                 avg_impressions = data['Impressions'].mean()
                 st.sidebar.text(f"Average Impressions: {avg_impressions:.2f}")
+                avg_ctr = data['CTR'].mean()
+                st.sidebar.text(f"Average CTR: {avg_ctr:.2f}%")
 
-                # Button to show URLs with lower than average clicks or impressions
+                # Button to show URLs with lower than average values
                 if st.sidebar.button("Show URLs with less than average clicks"):
                     lower_than_avg_clicks = data[data['Clicks'] < avg_clicks]
                     sorted_clicks = lower_than_avg_clicks.sort_values(by='Clicks', ascending=True)
-
                     for index, row in sorted_clicks.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
                 elif st.sidebar.button("Show URLs with less than average impressions"):
                     lower_than_avg_impressions = data[data['Impressions'] < avg_impressions]
                     sorted_impressions = lower_than_avg_impressions.sort_values(by='Impressions', ascending=True)
-
                     for index, row in sorted_impressions.iterrows():
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
+                elif st.sidebar.button("Show URLs with less than average CTR"):
+                    lower_than_avg_ctr = data[data['CTR'] < avg_ctr]
+                    sorted_ctr = lower_than_avg_ctr.sort_values(by='CTR', ascending=True)
+                    for index, row in sorted_ctr.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
                 else:
                     filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1]) & 
-                                         (data['Impressions'] >= impressions_range[0]) & (data['Impressions'] <= impressions_range[1])]
+                                         (data['Impressions'] >= impressions_range[0]) & (data['Impressions'] <= impressions_range[1]) & 
+                                         (data['CTR'] >= ctr_range[0]) & (data['CTR'] <= ctr_range[1])]
 
                     for index, row in filtered_data.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions", "-", row['CTR'], "CTR", "-", row['Position'], "position")
