@@ -32,16 +32,17 @@ def main():
             if validation_message == "Data is valid!":
                 st.success(validation_message)
                 
-                # URL multi-select dropdown filter in the sidebar
-                selected_urls = st.sidebar.multiselect(
-                    'Select URLs:',
-                    options=list(data['URL'].unique()),
-                    default=list(data['URL'].unique())
-                )
+                with st.sidebar.beta_expander("URL Filter"):
+                    # URL multi-select dropdown filter in the sidebar
+                    selected_urls = st.multiselect(
+                        'Select URLs:',
+                        options=list(data['URL'].unique()),
+                        default=list(data['URL'].unique())
+                    )
 
-                # If specific URLs are selected, filter the data by the selected URLs
-                if selected_urls:
-                    data = data[data['URL'].isin(selected_urls)]
+                    # If specific URLs are selected, filter the data by the selected URLs
+                    if selected_urls:
+                        data = data[data['URL'].isin(selected_urls)]
                 
                 # Slider for filtering by number of clicks, impressions, CTR, and position
                 attributes_ranges = {
