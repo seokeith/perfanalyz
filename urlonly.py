@@ -68,12 +68,12 @@ def main():
                     sorted_data = lower_than_avg.sort_values(by='Clicks', ascending=True)
 
                     for index, row in sorted_data.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks")
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
                 else:
                     filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
 
                     for index, row in filtered_data.iterrows():
-                        st.write(row['URL'], "-", row['Clicks'], "clicks")
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
