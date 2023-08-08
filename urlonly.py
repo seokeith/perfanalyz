@@ -46,12 +46,18 @@ def main():
                 # Slider in the sidebar for filtering by number of clicks
                 min_clicks = int(data['Clicks'].min())
                 max_clicks = int(data['Clicks'].max())
-                clicks_range = st.sidebar.slider(
-                    "Filter by number of clicks:",
-                    min_clicks,
-                    max_clicks,
-                    (min_clicks, max_clicks)
-                )
+                
+                # Handle case where min_clicks equals max_clicks
+                if min_clicks == max_clicks:
+                    st.sidebar.text(f"Clicks: {min_clicks}")
+                    clicks_range = (min_clicks, max_clicks)
+                else:
+                    clicks_range = st.sidebar.slider(
+                        "Filter by number of clicks:",
+                        min_clicks,
+                        max_clicks,
+                        (min_clicks, max_clicks)
+                    )
 
                 # Calculate the average clicks
                 avg_clicks = data['Clicks'].mean()
