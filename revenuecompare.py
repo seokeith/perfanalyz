@@ -31,9 +31,9 @@ def main():
         st.dataframe(df)
 
         st.subheader('Input expected rates:')
-        expected_clickout_rate = st.number_input('Expected Clickout rate from users', min_value=0.0, step=0.01, value=0.1)
-        expected_ftd_rate = st.number_input('Expected FTD rate from clickouts', min_value=0.0, step=0.01, value=0.3)
-        expected_rev_per_ftd = st.number_input('Expected Revenue per FTD', min_value=0.0, step=0.01, value=100)
+        expected_clickout_rate = st.number_input('Expected Clickout rate from users', min_value=0.0, step=0.01, value=0.1, format="%.2f")
+        expected_ftd_rate = st.number_input('Expected FTD rate from clickouts', min_value=0.0, step=0.01, value=0.3, format="%.2f")
+        expected_rev_per_ftd = st.number_input('Expected Revenue per FTD', min_value=0.0, step=0.01, value=100.0, format="%.2f")
 
         if st.button('Calculate'):
             df_result = calculate_performance(df, expected_clickout_rate, expected_ftd_rate, expected_rev_per_ftd)
