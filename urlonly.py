@@ -58,19 +58,43 @@ def main():
                     clicks_range = (min_clicks, max_clicks)
                     st.sidebar.text(f"Only one value for clicks: {min_clicks}")
 
-                # Calculate the average clicks
+                # Slider for filtering by number of impressions
+                min_impressions = int(data['Impressions'].min())
+                max_impressions = int(data['Impressions'].max())
+
+                if min_impressions != max_impressions:
+                    impressions_range = st.sidebar.slider(
+                        "Filter by number of impressions:",
+                        min_impressions,
+                        max_impressions,
+                        (min_impressions, max_impressions)
+                    )
+                else:
+                    impressions_range = (min_impressions, max_impressions)
+                    st.sidebar.text(f"Only one value for impressions: {min_impressions}")
+
+                # Calculate the average clicks and impressions
                 avg_clicks = data['Clicks'].mean()
                 st.sidebar.text(f"Average Clicks: {avg_clicks:.2f}")
+                avg_impressions = data['Impressions'].mean()
+                st.sidebar.text(f"Average Impressions: {avg_impressions:.2f}")
 
-                # Button to show URLs with lower than average clicks
+                # Button to show URLs with lower than average clicks or impressions
                 if st.sidebar.button("Show URLs with less than average clicks"):
-                    lower_than_avg = data[data['Clicks'] < avg_clicks]
-                    sorted_data = lower_than_avg.sort_values(by='Clicks', ascending=True)
+                    lower_than_avg_clicks = data[data['Clicks'] < avg_clicks]
+                    sorted_clicks = lower_than_avg_clicks.sort_values(by='Clicks', ascending=True)
 
-                    for index, row in sorted_data.iterrows():
+                    for index, row in sorted_clicks.iterrows():
+                        st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
+                elif st.sidebar.button("Show URLs with less than average impressions"):
+                    lower_than_avg_impressions = data[data['Impressions'] < avg_impressions]
+                    sorted_impressions = lower_than_avg_impressions.sort_values(by='Impressions', ascending=True)
+
+                    for index, row in sorted_impressions.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
                 else:
-                    filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1])]
+                    filtered_data = data[(data['Clicks'] >= clicks_range[0]) & (data['Clicks'] <= clicks_range[1]) & 
+                                         (data['Impressions'] >= impressions_range[0]) & (data['Impressions'] <= impressions_range[1])]
 
                     for index, row in filtered_data.iterrows():
                         st.write(row['URL'], "-", row['Clicks'], "clicks", "-", row['Impressions'], "impressions")
